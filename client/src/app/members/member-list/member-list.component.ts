@@ -2,6 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Member } from 'src/app/_models/member';
 import { MembersService } from 'src/app/_services/members.service';
 import {Observable} from 'rxjs'
+import { Pagination } from 'src/app/_models/pagination';
+import { UserParams } from 'src/app/_models/userParams';
+import { AccountService } from 'src/app/_services/account.service';
+import { User } from 'src/app/_models/user';
+import { take } from 'rxjs/operators';
+  
 
 @Component({
   selector: 'app-member-list',
@@ -10,12 +16,37 @@ import {Observable} from 'rxjs'
 })
 export class MemberListComponent implements OnInit {
 
-  members$: Observable<Member[]>;
+  members: Member[];
+  pagination: Pagination;
+  userParams: UserParams;
+  user: User;
+  genderList = [{value: 'male', display: 'Males'}, {value: 'female', display: 'Females'}];
 
-  constructor(private memberSertvice: MembersService) { }
+  constructor(private memberSertvice: MembersService) { 
+    this.userParams = this.memberSertvice.getUserParams();
+  }
 
   ngOnInit(): void {
-    this.members$ = this.memberSertvice.getMembers();
+    this.loadMembers();
+  }
+
+  loadMembers() : void {
+    this.memberSertvice.setUserParams(this.userParams);
+    this.memberSertvice.getMembers(this.userParams).subscribe(response => {
+      this.members = response.result;
+      this.pagination = response.pagination;
+    });
+  }
+
+  resetFilters(){
+    this.userParams = this.memberSertvice.resetUserParams();
+    this.loadMembers();
+  }
+
+  pageChanged(event: any){
+    this.userParams.pageNumber = event.page;
+    this.memberSertvice.setUserParams(this.userParams);
+    this.loadMembers();
   }
 
 
