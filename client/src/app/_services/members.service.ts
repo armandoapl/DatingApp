@@ -91,6 +91,17 @@ export class MembersService {
     return this.http.delete(this.baseUrl + 'users/delete-photo/' +photoId);
   }
 
+  addLike(userName: string){
+    return this.http.post(this.baseUrl+'likes/'+userName, {});
+  }
+
+  getLikes(predicate: string, pagenNumber: number, pageSize: number){
+    let params = this.getPaginationHeaders(pagenNumber, pageSize);
+    params = params.append('predicate', predicate);
+    //return this.http.get<Partial<Member[]>>(this.baseUrl+ 'likes?predicate='+ predicate);
+    return this.getPaginatedResult<Partial<Member[]>>(this.baseUrl + 'likes', params);
+  }
+
 
 
   private getPaginatedResult<T>(url, params) {
